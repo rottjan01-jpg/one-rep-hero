@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ONE REP HERO</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#07101a"/>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="brand">ONE REP HERO</h1>
+      <div class="row">
+        <button id="exportBtn" class="btn-ghost">Export</button>
+        <button id="importBtn" class="btn-ghost">Import</button>
+        <input id="importFile" type="file" accept="application/json,.json" class="hidden" />
+        <button id="openProgressBtn" class="btn-ghost">Progres</button>
+        <button id="openArchiveBtn" class="btn-ghost">Archiv</button>
+      </div>
+    </header>
+
+    <!-- HOME (Profile + New workout) -->
+    <section id="home" class="card">
+      <div class="row wrap" style="align-items:center;justify-content:space-between">
+        <div class="row" style="gap:14px;align-items:center">
+          <div id="profileAvatar" class="avatar">??</div>
+          <div>
+            <div id="profileName" style="font-weight:800;font-size:1.2rem">Jméno Příjmení</div>
+            <div class="hero-quote small">„One more rep, one step closer to greatness.“</div>
+          </div>
+        </div>
+        <div>
+          <button id="editProfileBtn" class="btn-muted">Upravit profil</button>
+        </div>
+      </div>
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><div class="small">Tréninků celkem</div><div id="statWorkouts" style="font-weight:800;font-size:1.2rem">0</div></div>
+        <div class="stat"><div class="small">Celkový čas</div><div id="statTime" style="font-weight:800;font-size:1.2rem">00:00:00</div></div>
+        <div class="stat"><div class="small">Průměrné RPE</div><div id="statRPE" style="font-weight:800;font-size:1.2rem">-</div></div>
+      </div>
+
+      <hr style="margin:14px 0;border-color:#122436"/>
+
+      <div class="row wrap">
+        <div class="col">
+          <label for="workoutDate">Datum tréninku</label>
+          <input id="workoutDate" type="date" />
+        </div>
+        <div class="col">
+          <label for="workoutTitle">Nadpis tréninku</label>
+          <input id="workoutTitle" placeholder="např. UPPERBODY / LEG DAY" />
+        </div>
+        <div style="align-self:end">
+          <button id="startFromHome" class="btn-primary" style="width:100%">Začít nový trénink</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <h3 style="margin:6px 0">Poslední tréninky</h3>
+        <div id="recentList" class="small"></div>
+      </div>
+    </section>
+
+    <!-- ACTIVE -->
+    <section id="active" class="card hidden">
+      <div class="row wrap" style="align-items:flex-end;justify-content:space-between">
+        <div class="col">
+          <label>Čas tréninku</label>
+          <div class="timer" id="timer">00:00:00</div>
+          <div style="margin-top:8px" class="row">
+            <button id="btnStart" class="btn-primary" disabled>Start</button>
+            <button id="btnPause" class="btn-muted" disabled>Pauza</button>
+            <button id="btnHome" class="btn-ghost">Zpět na úvod</button>
+          </div>
+        </div>
+        <div class="col">
+          <label>Čas pauzy</label>
+          <div class="rest-timer" id="restTimer">00:00</div>
+          <div style="margin-top:8px" class="row">
+            <button id="restStartBtn" class="btn-ghost">Start pauzy</button>
+            <button id="restStopBtn" class="btn-ghost">Stop pauzy</button>
+            <div id="lastRestBadge" class="small" style="margin-left:8px;color:var(--muted)"></div>
+          </div>
+        </div>
+        <div class="col">
+          <label for="activeTitle">Nadpis tréninku</label>
+          <input id="activeTitle" placeholder="např. UPPERBODY / LEG DAY" />
+          <div id="titleHint" class="small" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Vyber cviky</h3>
+          <div class="row">
+            <input id="addExerciseInput" placeholder="Přidat vlastní cvik" />
+            <button id="addExerciseBtn" class="btn-ghost">Přidat</button>
+          </div>
+        </div>
+        <div id="exerciseButtons" class="exercise-buttons"></div>
+      </div>
+
+      <hr />
+
+      <div>
+        <h3 style="margin:6px 0">Aktuální trénink</h3>
+        <div id="selectedList"></div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px;justify-content:flex-end">
+        <button id="doneWorkoutBtn" class="btn-primary" disabled>Hotovo — ukončit trénink</button>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="progress" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Progres</h3>
+        <button id="closeProgressBtn" class="btn-ghost">Zavřít</button>
+      </div>
+      <div style="margin-top:8px">
+        <label for="progressExercise">Cvik</label>
+        <select id="progressExercise"></select>
+        <label for="progressMode" style="margin-top:8px">Režim</label>
+        <select id="progressMode"><option value="daily">Denně (objem)</option><option value="monthly">Měsíčně (avg/max)</option></select>
+        <label for="aggMode" style="margin-top:8px">Agregace</label>
+        <select id="aggMode"><option value="avg">Průměr</option><option value="max">Max</option></select>
+      </div>
+      <canvas id="progressChart" style="margin-top:12px"></canvas>
+    </section>
+
+    <!-- ARCHIVE -->
+    <section id="archive" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Archiv</h3>
+        <button id="closeArchiveBtn" class="btn-ghost">Zavřít</button>
+      </div>
+      <div class="row wrap" style="margin-top:8px">
+        <div class="col">
+          <label for="archiveFilterExercise">Filtrovat podle cviku</label>
+          <select id="archiveFilterExercise"></select>
+        </div>
+        <div class="col">
+          <label for="archiveSearch">Hledat v názvu/poznámce</label>
+          <input id="archiveSearch" placeholder="např. bench, leg day..." />
+        </div>
+      </div>
+      <div id="archiveList" style="margin-top:12px"></div>
+    </section>
+
+    <footer>Data se ukládají lokálně do vašeho zařízení (localStorage).</footer>
+  </div>
+
+  <!-- SUMMARY MODAL -->
+  <div id="summaryModal" class="summary-modal hidden" role="dialog" aria-modal="true">
+    <div class="summary-top">
+      <h2 style="margin:0">Shrnutí tréninku</h2>
+      <button id="summaryCloseX" class="btn-ghost" aria-label="Zavřít">✕</button>
+    </div>
+    <div id="summaryStats" class="small"></div>
+    <canvas id="rpeChart" style="margin-top:8px; max-height:140px; height:140px"></canvas>
+    <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+      <button id="closeSummaryBtn" class="btn-ghost">Zavřít</button>
+      <button id="confirmSummaryBtn" class="btn-primary">Uložit a OK</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
