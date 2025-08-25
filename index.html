@@ -1,164 +1,617 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>One Rep Hero</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ONE REP HERO — Mobile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#0d1117; color:#fff; }
-    header { padding:1rem; text-align:center; background:#161b22; font-size:1.5rem; font-weight:bold; }
-    .tabbar { position:fixed; bottom:0; left:0; right:0; display:flex; background:#161b22; }
-    .tabbar button { flex:1; padding:1rem; border:none; background:none; color:#fff; font-size:1rem; }
-    .screen { display:none; padding:1rem; }
-    .active { display:block; }
-    .exercise-btn { display:block; width:100%; padding:0.8rem; margin:0.5rem 0; background:#238636; border:none; border-radius:8px; color:#fff; font-size:1rem; }
-    .exercise-log { margin-left:1rem; font-size:0.85rem; color:#ccc; }
-    .summary { background:#161b22; padding:1rem; border-radius:8px; margin:1rem 0; }
-    .close-btn { background:#da3633; border:none; color:#fff; padding:0.5rem 1rem; border-radius:5px; }
+    :root{ --bg:#07101a; --panel:#0b1522; --panel2:#08121a; --text:#eaf2ff; --muted:#9fb6d6; --accent:#2fb0ff; --accent2:#00e0ff; --ok:#22c55e; --warn:#f59e0b; --radius:14px; }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Oswald,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#05070a,#07101a);color:var(--text)}
+    .container{max-width:520px;margin:0 auto;padding:12px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    h1{margin:0;font-size:1.5rem;letter-spacing:.5px;font-weight:800}
+    .brand{font-weight:800}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border-radius:var(--radius);padding:12px;margin-top:10px;border:1px solid #122436}
+    .row{display:flex;gap:8px;align-items:center}
+    .row.wrap{flex-wrap:wrap}
+    .col{flex:1;min-width:140px}
+    label{color:var(--muted);font-size:.85rem}
+    input,select,textarea,button{font-family:inherit}
+    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #163047;background:#071827;color:var(--text)}
+    button{border:0;padding:10px 12px;border-radius:12px;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#031020;font-weight:800}
+    .btn-ghost{background:transparent;border:1px solid #113a56;color:var(--text)}
+    .btn-muted{background:#0f2130;color:var(--muted);border:1px solid #132a3f}
+    .btn-danger{background:#39151a;border:1px solid #5e1c27;color:#ffb4c0}
+    .exercise-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .ex-btn{background:#0f2236;color:var(--text);padding:8px 12px;border-radius:12px;border:1px solid #12384f;cursor:pointer;font-size:.9rem}
+    .ex-btn.active{outline:3px solid rgba(47,176,255,0.18);box-shadow:0 6px 14px rgba(11,40,62,0.55)}
+    .set-group{border-radius:12px;padding:10px;border:1px solid #103049;background:#061623;margin-top:10px;position:relative}
+    .set-title{display:flex;align-items:center;justify-content:space-between}
+    .set-remove{border:none;background:#1a2533;color:#91a6c3;border:1px solid #233a55;border-radius:10px;padding:4px 8px;font-size:.8rem;cursor:pointer}
+    .set-line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.06);font-size:.9rem}
+    .set-del{background:#1f2a3a;border:1px solid #2a3f5c;border-radius:8px;padding:2px 8px;font-size:.8rem;color:#b5c7e5}
+    .small{font-size:.8rem;color:var(--muted)}
+    .timer{font-weight:800;font-variant-numeric:tabular-nums;font-size:1.6rem}
+    .rest-timer{font-weight:700;font-variant-numeric:tabular-nums}
+    .summary-modal{position:fixed;inset:12% 4%;background:linear-gradient(180deg,#06121a,#071726);border-radius:14px;padding:14px;border:1px solid #123147;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:60;max-height:76vh;overflow:auto}
+    .summary-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .hidden{display:none}
+    footer{opacity:.6;margin-top:14px;text-align:center;font-size:.85rem}
+    .pill{padding:6px 10px;border-radius:999px;background:#0f2130;border:1px solid #132a3f}
+    .avatar{width:84px;height:84px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#0f2130;border:1px solid #133048;font-weight:900;font-size:1.4rem;letter-spacing:.5px}
+    .hero-quote{font-style:italic;opacity:.9}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .stat{background:#0a1a29;border:1px solid #14314b;border-radius:12px;padding:10px;text-align:center}
+    .divider{height:1px;background:#122436;margin:10px 0}
+    @media(max-width:560px){.row{flex-direction:column}.stats{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
-  <header>One Rep Hero</header>
+  <div class="container">
+    <header>
+      <h1 class="brand">ONE REP HERO</h1>
+      <div class="row">
+        <button id="exportBtn" class="btn-ghost">Export</button>
+        <button id="importBtn" class="btn-ghost">Import</button>
+        <input id="importFile" type="file" accept="application/json,.json" class="hidden" />
+        <button id="openProgressBtn" class="btn-ghost">Progres</button>
+        <button id="openArchiveBtn" class="btn-ghost">Archiv</button>
+      </div>
+    </header>
 
-  <div id="home" class="screen active">
-    <h2>Welcome, Hero!</h2>
-    <p>Total Workouts: <span id="totalWorkouts">0</span></p>
-    <p><em>"Strength is earned one rep at a time."</em></p>
-    <button onclick="startWorkout()">Start Workout</button>
+    <!-- HOME (Profile + New workout) -->
+    <section id="home" class="card">
+      <!-- Profile hero -->
+      <div class="row wrap" style="align-items:center;justify-content:space-between">
+        <div class="row" style="gap:14px;align-items:center">
+          <div id="profileAvatar" class="avatar">??</div>
+          <div>
+            <div id="profileName" style="font-weight:800;font-size:1.2rem">Jméno Příjmení</div>
+            <div class="hero-quote small">„One more rep, one step closer to greatness.“</div>
+          </div>
+        </div>
+        <div class="row">
+          <button id="editProfileBtn" class="btn-muted">Upravit profil</button>
+        </div>
+      </div>
+
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><div class="small">Tréninků celkem</div><div id="statWorkouts" style="font-weight:800;font-size:1.2rem">0</div></div>
+        <div class="stat"><div class="small">Celkový čas</div><div id="statTime" style="font-weight:800;font-size:1.2rem">00:00:00</div></div>
+        <div class="stat"><div class="small">Průměrné RPE</div><div id="statRPE" style="font-weight:800;font-size:1.2rem">-</div></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Weight block -->
+      <div class="row wrap">
+        <div class="col">
+          <label for="weightInput">Moje váha (kg)</label>
+          <input id="weightInput" type="number" step="0.1" placeholder="např. 82.5" />
+        </div>
+        <div class="col">
+          <label for="weightDate">Datum záznamu</label>
+          <input id="weightDate" type="date" />
+        </div>
+        <div style="align-self:end">
+          <button id="saveWeightBtn" class="btn-primary">Uložit váhu</button>
+        </div>
+      </div>
+      <div class="row wrap" style="margin-top:8px">
+        <div class="col">
+          <canvas id="weightChart" height="140"></canvas>
+        </div>
+        <div class="col">
+          <div id="weightList" class="small"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row wrap">
+        <div class="col">
+          <label for="workoutDate">Datum tréninku</label>
+          <input id="workoutDate" type="date" />
+        </div>
+        <div class="col">
+          <label for="workoutTitle">Nadpis tréninku</label>
+          <input id="workoutTitle" placeholder="např. UPPERBODY / LEG DAY" />
+        </div>
+        <div style="align-self:end">
+          <button id="startFromHome" class="btn-primary" style="width:100%">Začít trénink</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <h3 style="margin:6px 0">Poslední tréninky</h3>
+        <div id="recentList" class="small"></div>
+      </div>
+    </section>
+
+    <!-- ACTIVE -->
+    <section id="active" class="card hidden">
+      <div class="row wrap" style="align-items:flex-end;justify-content:space-between">
+        <div class="col">
+          <label>Čas tréninku</label>
+          <div class="timer" id="timer">00:00:00</div>
+          <div style="margin-top:8px" class="row">
+            <button id="btnStart" class="btn-primary" disabled>Start</button>
+            <button id="btnPause" class="btn-muted" disabled>Pauza</button>
+            <button id="btnHome" class="btn-ghost">Zpět na úvod</button>
+          </div>
+        </div>
+        <div class="col">
+          <label>Čas pauzy</label>
+          <div class="rest-timer" id="restTimer">00:00</div>
+          <div style="margin-top:8px" class="row">
+            <button id="restStartBtn" class="btn-ghost">Start pauzy</button>
+            <button id="restStopBtn" class="btn-ghost">Stop pauzy</button>
+            <div id="lastRestBadge" class="small" style="margin-left:8px;color:var(--muted)"></div>
+          </div>
+        </div>
+        <div class="col">
+          <label for="activeTitle">Nadpis tréninku</label>
+          <input id="activeTitle" placeholder="např. UPPERBODY / LEG DAY" />
+          <div id="titleHint" class="small" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Vyber cviky</h3>
+          <div class="row">
+            <input id="addExerciseInput" placeholder="Přidat vlastní cvik" />
+            <button id="addExerciseBtn" class="btn-ghost">Přidat</button>
+          </div>
+        </div>
+        <div id="exerciseButtons" class="exercise-buttons"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <h3 style="margin:6px 0">Aktuální trénink</h3>
+        <div id="selectedList"></div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px;justify-content:flex-end">
+        <button id="doneWorkoutBtn" class="btn-primary" disabled>Hotovo — ukončit trénink</button>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="progress" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Progres</h3>
+        <button id="closeProgressBtn" class="btn-ghost">Zavřít</button>
+      </div>
+      <div style="margin-top:8px">
+        <label for="progressExercise">Cvik</label>
+        <select id="progressExercise"></select>
+        <label for="progressMode" style="margin-top:8px">Režim</label>
+        <select id="progressMode"><option value="daily">Denně (objem)</option><option value="monthly">Měsíčně (avg/max)</option></select>
+        <label for="aggMode" style="margin-top:8px">Agregace</label>
+        <select id="aggMode"><option value="avg">Průměr</option><option value="max">Max</option></select>
+      </div>
+      <canvas id="progressChart" style="margin-top:12px" height="180"></canvas>
+    </section>
+
+    <!-- ARCHIVE -->
+    <section id="archive" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Archiv</h3>
+        <button id="closeArchiveBtn" class="btn-ghost">Zavřít</button>
+      </div>
+      <div class="row wrap" style="margin-top:8px">
+        <div class="col">
+          <label for="archiveFilterExercise">Filtrovat podle cviku</label>
+          <select id="archiveFilterExercise"></select>
+        </div>
+        <div class="col">
+          <label for="archiveSearch">Hledat v názvu/poznámce</label>
+          <input id="archiveSearch" placeholder="např. bench, leg day..." />
+        </div>
+      </div>
+      <div id="archiveList" style="margin-top:12px"></div>
+    </section>
+
+    <footer>Data se ukládají lokálně do vašeho zařízení (localStorage).</footer>
   </div>
 
-  <div id="workout" class="screen">
-    <h2 id="workoutTitle">Workout</h2>
-    <input type="text" id="customTitle" placeholder="Enter workout title" />
-    <div id="exerciseList"></div>
-    <button onclick="finishWorkout()">Finish Workout</button>
-    <div id="timer">
-      <p>Time: <span id="timeDisplay">0:00</span></p>
-      <button onclick="startTimer()">Start</button>
-      <button onclick="pauseTimer()">Pause</button>
-      <button onclick="resetTimer()">Reset</button>
+  <!-- SUMMARY MODAL -->
+  <div id="summaryModal" class="summary-modal hidden">
+    <div class="summary-top">
+      <h2 style="margin:0">Shrnutí tréninku</h2>
+      <button id="summaryCloseX" class="btn-ghost" aria-label="Zavřít">✕</button>
+    </div>
+    <div id="summaryStats" class="small"></div>
+    <canvas id="rpeChart" style="margin-top:8px; max-height:140px; height:140px"></canvas>
+    <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+      <button id="closeSummaryBtn" class="btn-ghost">Zavřít</button>
+      <button id="confirmSummaryBtn" class="btn-primary">Uložit a OK</button>
     </div>
   </div>
 
-  <div id="archive" class="screen">
-    <h2>Archive</h2>
-    <input type="text" id="filterExercise" placeholder="Filter by exercise" oninput="renderArchive()" />
-    <div id="archiveList"></div>
-  </div>
-
-  <div id="profile" class="screen">
-    <h2>Profile</h2>
-    <input type="text" id="firstName" placeholder="First Name" />
-    <input type="text" id="lastName" placeholder="Last Name" />
-    <button onclick="saveProfile()">Save Profile</button>
-    <p id="profileDisplay"></p>
-  </div>
-
-  <div class="tabbar">
-    <button onclick="showScreen('home')">Home</button>
-    <button onclick="showScreen('workout')">Workout</button>
-    <button onclick="showScreen('archive')">Archive</button>
-    <button onclick="showScreen('profile')">Profile</button>
-  </div>
-
 <script>
-let workouts = JSON.parse(localStorage.getItem("workouts")||"[]");
-let timer, seconds=0, running=false;
+(function(){
+  'use strict';
+  // storage keys & defaults
+  const STORAGE = { workouts:'orh.workouts.v1', bank:'orh.exerciseBank.v1', profile:'orh.profile.v1', weight:'orh.weightHistory.v1' };
+  const DEFAULT_BANK = ['Bench Press','Incline Bench Press','Shoulder Press','Lateral Raise','Lat Pulldown','Seated Row','Squat','Deadlift','Leg Press','Leg Curl','Calf Raise','Biceps Curl','Triceps Pushdown','Face Pull','Chest Press','Pull Up','Dip','Barbell Row','Leg Extension'];
 
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
+  function load(k,f){ try{ return JSON.parse(localStorage.getItem(k)) ?? f }catch{ return f } }
+  function save(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
 
-function startWorkout(){
-  document.getElementById("exerciseList").innerHTML="";
-  showScreen('workout');
-}
+  let workouts = load(STORAGE.workouts, []);
+  let exerciseBank = load(STORAGE.bank, DEFAULT_BANK.slice());
+  let profile = load(STORAGE.profile, { firstName:'Jméno', lastName:'Příjmení' });
+  let weightHistory = load(STORAGE.weight, []); // [{date:'YYYY-MM-DD', weight:82.4}]
 
-function addExercise(name){
-  let list=document.getElementById("exerciseList");
-  let btn=document.createElement("button");
-  btn.className="exercise-btn";
-  btn.textContent=name;
-  btn.onclick=()=>logSet(name, btn);
-  list.appendChild(btn);
-}
+  // state
+  const state = {
+    started:false, paused:false, startMs:0, pauseStart:0, pausedAccum:0, timerId:null, runMs:0,
+    restId:null, restStart:0, lastRestSec:0,
+    selected:[], // exercise names in order
+    todaySets: [], // {exercise,weight,reps,rpe,note,restSec,ts}
+    title:''
+  };
 
-function logSet(exercise, btn){
-  let reps=prompt("Reps?");
-  let weight=prompt("Weight?");
-  let log=document.createElement("div");
-  log.className="exercise-log";
-  log.textContent=`${exercise}: ${reps} reps @ ${weight}kg`;
-  btn.insertAdjacentElement("afterend", log);
-}
+  // elements
+  const profileAvatar = document.getElementById('profileAvatar');
+  const profileNameEl = document.getElementById('profileName');
+  const editProfileBtn = document.getElementById('editProfileBtn');
 
-function finishWorkout(){
-  let title=document.getElementById("customTitle").value||"Untitled Workout";
-  workouts.push({title, date:new Date().toLocaleString()});
-  localStorage.setItem("workouts", JSON.stringify(workouts));
-  alert("Workout saved!");
-  showScreen('home');
-  renderArchive();
-}
+  const weightInput = document.getElementById('weightInput');
+  const weightDate = document.getElementById('weightDate');
+  const saveWeightBtn = document.getElementById('saveWeightBtn');
+  const weightChartEl = document.getElementById('weightChart');
+  const weightList = document.getElementById('weightList');
 
-function renderArchive(){
-  let filter=document.getElementById("filterExercise").value.toLowerCase();
-  let list=document.getElementById("archiveList");
-  list.innerHTML="";
-  workouts.filter(w=>w.title.toLowerCase().includes(filter)).forEach(w=>{
-    let div=document.createElement("div");
-    div.textContent=`${w.title} - ${w.date}`;
-    list.appendChild(div);
+  const workoutDate = document.getElementById('workoutDate');
+  const workoutTitle = document.getElementById('workoutTitle');
+  const activeTitle = document.getElementById('activeTitle');
+  const titleHint = document.getElementById('titleHint');
+  const startFromHome = document.getElementById('startFromHome');
+  const openProgressBtn = document.getElementById('openProgressBtn');
+  const openArchiveBtn = document.getElementById('openArchiveBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+
+  const home = document.getElementById('home');
+  const active = document.getElementById('active');
+  const progress = document.getElementById('progress');
+  const archive = document.getElementById('archive');
+
+  const timerEl = document.getElementById('timer');
+  const btnStart = document.getElementById('btnStart');
+  const btnPause = document.getElementById('btnPause');
+  const btnHome = document.getElementById('btnHome');
+
+  const restTimerEl = document.getElementById('restTimer');
+  const restStartBtn = document.getElementById('restStartBtn');
+  const restStopBtn = document.getElementById('restStopBtn');
+  const lastRestBadge = document.getElementById('lastRestBadge');
+
+  const exerciseButtons = document.getElementById('exerciseButtons');
+  const addExerciseInput = document.getElementById('addExerciseInput');
+  const addExerciseBtn = document.getElementById('addExerciseBtn');
+
+  const selectedList = document.getElementById('selectedList');
+  const doneWorkoutBtn = document.getElementById('doneWorkoutBtn');
+
+  const recentList = document.getElementById('recentList');
+
+  const progressExercise = document.getElementById('progressExercise');
+  const progressMode = document.getElementById('progressMode');
+  const aggMode = document.getElementById('aggMode');
+  const progressChartEl = document.getElementById('progressChart');
+
+  const archiveFilterExercise = document.getElementById('archiveFilterExercise');
+  const archiveSearch = document.getElementById('archiveSearch');
+  const archiveList = document.getElementById('archiveList');
+
+  const summaryModal = document.getElementById('summaryModal');
+  const summaryStats = document.getElementById('summaryStats');
+  const rpeChartEl = document.getElementById('rpeChart');
+  const closeSummaryBtn = document.getElementById('closeSummaryBtn');
+  const summaryCloseX = document.getElementById('summaryCloseX');
+  const confirmSummaryBtn = document.getElementById('confirmSummaryBtn');
+
+  // charts
+  let progressChart = null, rpeChart = null, weightChart = null;
+
+  // helpers
+  function todayISO(){ const d=new Date(); const tz=d.getTimezoneOffset()*60000; return new Date(d-tz).toISOString().slice(0,10); }
+  function fmtHMS(ms){ const s=Math.floor(ms/1000); const hh=String(Math.floor(s/3600)).padStart(2,'0'); const mm=String(Math.floor((s%3600)/60)).padStart(2,'0'); const ss=String(s%60).padStart(2,'0'); return `${hh}:${mm}:${ss}`; }
+  function fmtMMSS(sec){ const m=Math.floor(sec/60); const s=sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+
+  function switchTo(section){ home.classList.add('hidden'); active.classList.add('hidden'); progress.classList.add('hidden'); archive.classList.add('hidden'); section.classList.remove('hidden'); }
+
+  // PROFILE
+  function initials(f,l){ const a=(f||'').trim()[0]||'?'; const b=(l||'').trim()[0]||'?'; return (a+b).toUpperCase(); }
+  function renderProfile(){ profileAvatar.textContent = initials(profile.firstName, profile.lastName); profileNameEl.textContent = `${profile.firstName||''} ${profile.lastName||''}`.trim()||'Jméno Příjmení'; }
+  editProfileBtn.addEventListener('click',()=>{
+    const first = prompt('Jméno', profile.firstName||'') ?? profile.firstName;
+    const last = prompt('Příjmení', profile.lastName||'') ?? profile.lastName;
+    profile = { firstName:first||'Jméno', lastName:last||'Příjmení' }; save(STORAGE.profile, profile); renderProfile();
   });
-  document.getElementById("totalWorkouts").textContent=workouts.length;
-}
 
-function startTimer(){
-  if(!running){
-    running=true;
-    timer=setInterval(()=>{
-      seconds++;
-      document.getElementById("timeDisplay").textContent=formatTime(seconds);
-    },1000);
+  // WEIGHT
+  function buildWeight(){ weightDate.value = todayISO(); if(weightHistory.length){ const last = weightHistory[weightHistory.length-1]; weightInput.value = last.weight; } drawWeight(); renderWeightList(); }
+  function saveWeight(){ const w=parseFloat(weightInput.value); if(isNaN(w)){ alert('Zadej platnou váhu'); return; } const d= weightDate.value||todayISO(); weightHistory.push({date:d, weight:w}); save(STORAGE.weight, weightHistory); drawWeight(); renderWeightList(); updateStats(); }
+  saveWeightBtn.addEventListener('click', saveWeight);
+  function drawWeight(){ if(weightChart) weightChart.destroy(); if(!weightHistory.length){ return; } const labels = weightHistory.map(x=>x.date); const vals=weightHistory.map(x=>x.weight); const ctx=weightChartEl.getContext('2d'); const grad=ctx.createLinearGradient(0,0,0,140); grad.addColorStop(0,'#2fb0ff'); grad.addColorStop(1,'#073147'); weightChart = new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Váha (kg)',data:vals,backgroundColor:grad,borderColor:'#2fb0ff',fill:true,tension:.3}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:false}}}); }
+  function renderWeightList(){ weightList.innerHTML = weightHistory.slice().reverse().slice(0,6).map(x=>`<div>${x.date}: <strong>${x.weight} kg</strong></div>`).join('') || '<div class="small">Žádné záznamy.</div>'; }
+
+  // init
+  function init(){ workoutDate.value = todayISO(); weightDate.value=todayISO(); buildExerciseButtons(); buildRecent(); buildArchiveFilters(); buildArchive(); buildProgressOptions(); updateStats(); renderProfile(); buildWeight(); }
+
+  // build exercise selection buttons
+  function buildExerciseButtons(){ exerciseButtons.innerHTML=''; exerciseBank.forEach(name=>{ const b=document.createElement('button'); b.className='ex-btn'; b.textContent=name; b.onclick=()=>toggleSelectExercise(name,b); exerciseButtons.appendChild(b); }); }
+
+  function toggleSelectExercise(name, btn){
+    const idx = state.selected.indexOf(name);
+    if(idx===-1){ state.selected.push(name); btn.classList.add('active'); }
+    else { state.selected.splice(idx,1); btn.classList.remove('active'); // also remove sets for this exercise if present
+      state.todaySets = state.todaySets.filter(s=>s.exercise!==name); }
+    renderSelectedList(); updateUIState();
   }
-}
 
-function pauseTimer(){
-  clearInterval(timer);
-  running=false;
-}
+  addExerciseBtn.addEventListener('click', ()=>{ const v=(addExerciseInput.value||'').trim(); if(!v) return; if(!exerciseBank.includes(v)){ exerciseBank.push(v); save(STORAGE.bank, exerciseBank); } addExerciseInput.value=''; buildExerciseButtons(); });
 
-function resetTimer(){
-  clearInterval(timer);
-  running=false;
-  seconds=0;
-  document.getElementById("timeDisplay").textContent="0:00";
-}
+  // render selected exercises + sets UI
+  function renderSelectedList(){ selectedList.innerHTML=''; if(state.selected.length===0){ selectedList.innerHTML='<div class="small">Žádné vybrané cviky — klepni na název cviku pro přidání.</div>'; doneWorkoutBtn.disabled=true; return; }
+    doneWorkoutBtn.disabled=false;
+    state.selected.forEach(ex=>{
+      const box=document.createElement('div'); box.className='set-group';
 
-function formatTime(sec){
-  let m=Math.floor(sec/60);
-  let s=sec%60;
-  return `${m}:${s.toString().padStart(2,"0")}`;
-}
+      const header=document.createElement('div'); header.className='set-title';
+      const title=document.createElement('div'); title.innerHTML=`<strong>${ex}</strong> <span class="small">(${state.todaySets.filter(s=>s.exercise===ex).length} sérií)</span>`;
+      const removeBtn=document.createElement('button'); removeBtn.className='set-remove'; removeBtn.textContent='✕'; removeBtn.title='Odebrat cvik'; removeBtn.onclick=()=>{ state.selected = state.selected.filter(n=>n!==ex); state.todaySets = state.todaySets.filter(s=>s.exercise!==ex); renderSelectedList(); updateUIState(); const b=[...exerciseButtons.children].find(el=>el.textContent===ex); if(b) b.classList.remove('active'); };
+      header.appendChild(title); header.appendChild(removeBtn); box.appendChild(header);
 
-function saveProfile(){
-  let fn=document.getElementById("firstName").value;
-  let ln=document.getElementById("lastName").value;
-  localStorage.setItem("profile", JSON.stringify({fn, ln}));
-  renderProfile();
-}
+      const prev = document.createElement('div'); prev.style.marginTop='6px';
+      const sets = state.todaySets.filter(s=>s.exercise===ex);
+      if(sets.length){ sets.slice().reverse().forEach((s,idx)=>{ const line=document.createElement('div'); line.className='set-line'; const left=document.createElement('div'); left.innerHTML=`<div class=\\"small\\">${fmtMMSS(Math.floor((Date.now()-s.ts)/1000))} ago · <strong>${s.weight}kg × ${s.reps}</strong> ${s.rpe?`· RPE ${s.rpe}`:''} ${s.note?`· <span class=\\\\\\"small\\\\\\">${s.note}</span>`:''}</div>`; const right=document.createElement('div'); const del=document.createElement('button'); del.className='set-del'; del.textContent='Smazat'; del.onclick=()=>{ const i = state.todaySets.findIndex(x=> x===s); if(i>-1){ state.todaySets.splice(i,1); renderSelectedList(); } }; right.appendChild(del); line.appendChild(left); line.appendChild(right); prev.appendChild(line); }); } else { prev.innerHTML='<div class="small">Žádné série zatím</div>'; }
+      box.appendChild(prev);
 
-function renderProfile(){
-  let p=JSON.parse(localStorage.getItem("profile")||"{}");
-  document.getElementById("profileDisplay").textContent=`${p.fn||""} ${p.ln||""}`;
-}
+      // inputs for new set
+      const inputs=document.createElement('div'); inputs.className='row wrap'; inputs.style.marginTop='8px';
+      const w=document.createElement('input'); w.placeholder='váha (kg)'; w.type='number'; w.step='0.5'; w.style.width='110px';
+      const r=document.createElement('input'); r.placeholder='opakování'; r.type='number'; r.style.width='110px';
+      const e=document.createElement('input'); e.placeholder='RPE'; e.type='number'; e.step='0.5'; e.min='1'; e.max='10'; e.style.width='90px';
+      const n=document.createElement('input'); n.placeholder='poznámka'; n.style.flex='1';
+      const addBtn=document.createElement('button'); addBtn.className='btn-primary'; addBtn.textContent='Přidat sérii';
+      addBtn.onclick=()=>{
+        const weight=parseFloat(w.value); const reps=parseInt(r.value); const rpe = e.value?parseFloat(e.value):null; const note=n.value||'';
+        if(isNaN(weight)||isNaN(reps)){ alert('Vyplň váhu a opakování'); return; }
+        const rest = state.lastRestSec || 0;
+        state.todaySets.push({exercise:ex,weight, reps, rpe, note, restSec:rest, ts: Date.now()});
+        w.value=''; r.value=''; e.value=''; n.value=''; state.lastRestSec=0; lastRestBadge.textContent=''; renderSelectedList();
+      };
 
-renderProfile();
-renderArchive();
+      inputs.appendChild(w); inputs.appendChild(r); inputs.appendChild(e); inputs.appendChild(n); inputs.appendChild(addBtn);
+      box.appendChild(inputs);
+      selectedList.appendChild(box);
+    });
+  }
 
-// předpřipravené cviky
-["Bench Press","Squat","Deadlift","Overhead Press","Pull-ups"].forEach(addExercise);
+  // timer controls: start only when user presses Start (after selection)
+  function updateUIState(){
+    btnStart.disabled = state.selected.length===0 || state.started;
+    btnPause.disabled = !state.started;
+    // sync title home -> active (one-time hint)
+    if(workoutTitle.value && !activeTitle.value){ activeTitle.value = workoutTitle.value; }
+    state.title = activeTitle.value.trim();
+    titleHint.textContent = state.title ? `Nadpis: ${state.title}` : '';
+  }
+
+  btnStart.addEventListener('click', ()=>{
+    if(state.started) return;
+    state.started=true; state.paused=false; state.startMs = Date.now(); state.pausedAccum=0; timerTick(); state.timerId=setInterval(timerTick,1000);
+    btnStart.disabled=true; btnPause.disabled=false; startFromHome.disabled=true;
+  });
+
+  btnPause.addEventListener('click', ()=>{
+    if(!state.started) return;
+    if(!state.paused){ state.paused=true; state.pauseStart=Date.now(); btnPause.textContent='Pokračovat'; }
+    else { state.paused=false; state.pausedAccum += Date.now()-state.pauseStart; btnPause.textContent='Pauza'; }
+  });
+
+  btnHome.addEventListener('click', ()=>{ switchTo(home); });
+
+  function timerTick(){
+    if(!state.started){ timerEl.textContent = fmtHMS(state.runMs||0); return; }
+    const now = state.paused ? state.pauseStart : Date.now();
+    state.runMs = now - state.startMs - state.pausedAccum;
+    if(state.runMs<0) state.runMs = 0;
+    timerEl.textContent = fmtHMS(state.runMs);
+  }
+
+  // rest timer
+  restStartBtn.addEventListener('click', ()=>{ if(state.restId) return; state.restStart = Date.now(); state.restId = setInterval(()=>{ const s = Math.floor((Date.now()-state.restStart)/1000); restTimerEl.textContent = fmtMMSS(s); },1000); });
+  restStopBtn.addEventListener('click', ()=>{ if(!state.restId) return; clearInterval(state.restId); state.restId=null; const sec = Math.floor((Date.now()-state.restStart)/1000); state.lastRestSec = sec; lastRestBadge.textContent = `Poslední pauza: ${fmtMMSS(sec)}`; restTimerEl.textContent='00:00'; });
+
+  // Done button -> show summary modal with small RPE chart
+  function openSummary(){
+    if(state.todaySets.length===0){ alert('Přidej aspoň jednu sérii před ukončením.'); return; }
+    const totalSets = state.todaySets.length;
+    const totalTime = state.runMs || 0;
+    const rpeCount = state.todaySets.filter(s=>s.rpe!=null).length;
+    const avgRPE = rpeCount? Math.round((state.todaySets.reduce((a,s)=>a+(s.rpe||0),0)/rpeCount)*10)/10 : 0;
+    const labels = state.todaySets.map(s => new Date(s.ts).toLocaleTimeString());
+    const rpeVals = state.todaySets.map(s => s.rpe || 0);
+
+    const title = (activeTitle.value || workoutTitle.value || '').trim();
+
+    summaryStats.innerHTML = `Název: <strong>${title||'-'}</strong><br/>Datum: <strong>${workoutDate.value||todayISO()}</strong><br/>Celkový čas: <strong>${fmtHMS(totalTime)}</strong><br/>Série: <strong>${totalSets}</strong><br/>Průměrné RPE: <strong>${rpeCount?avgRPE:'-'}</strong>`;
+
+    if(rpeChart) rpeChart.destroy();
+    const ctx = rpeChartEl.getContext('2d');
+    rpeChart = new Chart(ctx, { type:'line', data:{ labels: labels, datasets:[{ label:'RPE (série)', data: rpeVals, borderColor:'#2fb0ff', backgroundColor:'rgba(47,176,255,0.15)', fill:true, tension:.35 }] }, options:{ scales:{ y:{ beginAtZero:true, max:10 } }, plugins:{ legend:{display:false} }, maintainAspectRatio:false } });
+
+    summaryModal.classList.remove('hidden');
+  }
+
+  document.getElementById('doneWorkoutBtn').addEventListener('click', openSummary);
+  const hideSummary = ()=> summaryModal.classList.add('hidden');
+  closeSummaryBtn.addEventListener('click', hideSummary);
+  summaryCloseX.addEventListener('click', hideSummary);
+
+  confirmSummaryBtn.addEventListener('click', ()=>{
+    const id = (crypto && crypto.randomUUID)?crypto.randomUUID(): (Date.now()+'-'+Math.random());
+    const w = { id, date: workoutDate.value||todayISO(), durationMs: state.runMs||0, sets: state.todaySets.slice(), title: (activeTitle.value||workoutTitle.value||'').trim() };
+    workouts.push(w); save(STORAGE.workouts, workouts);
+    // reset state for next workout without app reload
+    state.selected = []; state.todaySets = []; state.runMs=0; state.pausedAccum=0; state.paused=false; state.lastRestSec=0; activeTitle.value=''; workoutTitle.value='';
+    clearInterval(state.timerId); state.timerId=null; timerEl.textContent='00:00:00'; btnPause.textContent='Pauza'; state.started=false; btnStart.disabled=true; btnPause.disabled=true; startFromHome.disabled=false;
+    hideSummary(); buildExerciseButtons(); buildRecent(); buildArchiveFilters(); buildArchive(); buildProgressOptions(); updateStats(); renderSelectedList(); switchTo(home);
+  });
+
+  // progress & archive
+  function buildRecent(){
+    recentList.innerHTML='';
+    const last = [...workouts].reverse().slice(0,6);
+    if(!last.length){ recentList.innerHTML='<div class="small">Žádné tréninky.</div>'; return; }
+    last.forEach(w=>{
+      const d=document.createElement('div');
+      const mins=Math.round((w.durationMs||0)/60000);
+      const ttl = w.title? ` · <span class="pill">${w.title}</span>` : '';
+      d.innerHTML=`<strong>${w.date}</strong>${ttl} · ${mins} min · ${w.sets.length} sérií`;
+      recentList.appendChild(d);
+    });
+  }
+
+  function buildArchiveFilters(){
+    archiveFilterExercise.innerHTML='';
+    const optAll=document.createElement('option'); optAll.value=''; optAll.textContent='(všechny cviky)'; archiveFilterExercise.appendChild(optAll);
+    const set=new Set(); workouts.forEach(w=> w.sets.forEach(s=> set.add(s.exercise)));
+    Array.from(set).sort().forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; archiveFilterExercise.appendChild(o); });
+  }
+
+  function buildArchive(){
+    archiveList.innerHTML='';
+    const q = (archiveSearch.value||'').toLowerCase();
+    const ex = archiveFilterExercise.value;
+
+    const list = workouts.slice().reverse().filter(w=>{
+      const textOk = !q || (w.title||'').toLowerCase().includes(q) || (w.sets||[]).some(s=> (s.note||'').toLowerCase().includes(q));
+      const exOk = !ex || (w.sets||[]).some(s=> s.exercise===ex);
+      return textOk && exOk;
+    });
+
+    if(!list.length){ archiveList.innerHTML='<div class="small">Nic k zobrazení.</div>'; return; }
+
+    list.forEach(w=>{
+      const det=document.createElement('details');
+      const sum=document.createElement('summary');
+      const mins=Math.round((w.durationMs||0)/60000);
+      const ttl = w.title? ` · ${w.title}` : '';
+      sum.textContent=`${w.date}${ttl} · ${mins} min · ${w.sets.length} sérií`;
+      det.appendChild(sum);
+      const wrap=document.createElement('div'); wrap.className='small';
+      w.sets.filter(s=>!ex || s.exercise===ex).forEach((s,i)=>{
+        const el=document.createElement('div'); el.textContent=`${i+1}. ${s.exercise} — ${s.weight}kg × ${s.reps}${s.rpe?` · RPE ${s.rpe}`:''}${s.note?` · ${s.note}`:''}`; wrap.appendChild(el);
+      });
+      det.appendChild(wrap);
+      archiveList.appendChild(det);
+    });
+  }
+
+  // progress chart functions
+  function buildProgressOptions(){
+    progressExercise.innerHTML='';
+    const set=new Set(); workouts.forEach(w=> w.sets.forEach(s=> set.add(s.exercise)));
+    const arr=Array.from(set).sort();
+    if(arr.length===0){ const o=document.createElement('option'); o.textContent='(žádná data)'; progressExercise.appendChild(o); return; }
+    arr.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; progressExercise.appendChild(o); });
+  }
+
+  function drawProgress(){
+    if(progressChart) progressChart.destroy();
+    const ex = progressExercise.value; if(!ex) return;
+    const mode=progressMode.value; const agg=aggMode.value;
+    if(mode==='daily'){
+      const map=new Map();
+      workouts.forEach(w=>{ const date=w.date; const vol=w.sets.filter(s=>s.exercise===ex).reduce((a,s)=>a+s.weight*s.reps,0); if(vol>0) map.set(date,(map.get(date)||0)+vol); });
+      const labels=Array.from(map.keys()).sort();
+      const vals=labels.map(d=>map.get(d));
+      const ctx=progressChartEl.getContext('2d');
+      const grad=ctx.createLinearGradient(0,0,0,200); grad.addColorStop(0,'#2fb0ff'); grad.addColorStop(1,'#073147');
+      progressChart=new Chart(ctx,{type:'line',data:{labels, datasets:[{label:ex,data:vals,backgroundColor:grad,borderColor:'#2fb0ff',fill:true,tension:.3}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    } else {
+      const map=new Map();
+      workouts.forEach(w=>{ const ym=w.date.slice(0,7); const vals=w.sets.filter(s=>s.exercise===ex).map(s=>s.weight*s.reps); if(vals.length){ if(!map.has(ym)) map.set(ym,[]); map.get(ym).push(...vals); } });
+      const labels=Array.from(map.keys()).sort();
+      const vals=labels.map(k=>{ const arr=map.get(k)||[]; if(agg==='avg') return Math.round(arr.reduce((a,b)=>a+b,0)/arr.length||0); return Math.max(...arr||[0]); });
+      const ctx=progressChartEl.getContext('2d');
+      const grad=ctx.createLinearGradient(0,0,0,200); grad.addColorStop(0,'#2fb0ff'); grad.addColorStop(1,'#073147');
+      progressChart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:ex,data:vals,backgroundColor:grad,borderColor:'#2fb0ff',fill:true,tension:.3}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    }
+  }
+
+  // events for navigation
+  document.getElementById('openProgressBtn').addEventListener('click', ()=>{ switchTo(progress); buildProgressOptions(); drawProgress(); });
+  document.getElementById('closeProgressBtn').addEventListener('click', ()=>switchTo(home));
+  document.getElementById('openArchiveBtn').addEventListener('click', ()=>{ switchTo(archive); buildArchiveFilters(); buildArchive(); });
+  document.getElementById('closeArchiveBtn').addEventListener('click', ()=>switchTo(home));
+  progressExercise.addEventListener('change', drawProgress); progressMode.addEventListener('change', drawProgress); aggMode.addEventListener('change', drawProgress);
+  archiveFilterExercise.addEventListener('change', buildArchive);
+  archiveSearch.addEventListener('input', buildArchive);
+
+  // start from home: open active screen but don't start timer until user presses Start
+  startFromHome.addEventListener('click', ()=>{ switchTo(active); updateUIState(); renderSelectedList(); activeTitle.value = workoutTitle.value; state.title = activeTitle.value.trim(); });
+  activeTitle.addEventListener('input', ()=>{ state.title = activeTitle.value.trim(); titleHint.textContent = state.title ? `Nadpis: ${state.title}` : ''; });
+
+  // EXPORT / IMPORT
+  exportBtn.addEventListener('click', ()=>{
+    const payload = { version:4, exportedAt:new Date().toISOString(), workouts, exerciseBank, profile, weightHistory };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `one-rep-hero-export-${todayISO()}.json`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+
+  importBtn.addEventListener('click', ()=> importFile.click());
+  importFile.addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const data = JSON.parse(reader.result);
+        if(!data || (!Array.isArray(data.workouts) && !Array.isArray(data.sessions) )) throw new Error('Neplatný soubor');
+        workouts = Array.isArray(data.workouts) ? data.workouts : data.sessions; // backward compat
+        exerciseBank = Array.isArray(data.exerciseBank) ? data.exerciseBank : exerciseBank;
+        if(data.profile) profile=data.profile; save(STORAGE.profile,profile);
+        if(Array.isArray(data.weightHistory)) weightHistory = data.weightHistory; save(STORAGE.weight, weightHistory);
+        save(STORAGE.workouts, workouts); save(STORAGE.bank, exerciseBank);
+        buildExerciseButtons(); buildRecent(); buildArchiveFilters(); buildArchive(); buildProgressOptions(); updateStats(); renderProfile(); buildWeight();
+        alert('Import dokončen');
+      }catch(err){ alert('Nepodařilo se importovat JSON: '+err.message); }
+      importFile.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  // Stats from workouts
+  function updateStats(){
+    const count = workouts.length; document.getElementById('statWorkouts').textContent = count;
+    const totalMs = workouts.reduce((a,w)=>a+(w.durationMs||0),0); document.getElementById('statTime').textContent = fmtHMS(totalMs);
+    const rpeVals = []; workouts.forEach(w=> (w.sets||[]).forEach(s=>{ if(typeof s.rpe==='number') rpeVals.push(s.rpe) }));
+    document.getElementById('statRPE').textContent = rpeVals.length? (Math.round((rpeVals.reduce((a,b)=>a+b,0)/rpeVals.length)*10)/10) : '-';
+  }
+
+  // init run
+  init();
+})();
 </script>
 </body>
 </html>
